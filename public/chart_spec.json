@@ -1,0 +1,52 @@
+{
+    "project": "Smart QC Tools",
+    "version": "1.0",
+    "description": "Chart specification for LLM-driven automated charting.",
+    "ai_config": {
+        "active_profile": "deepseek_public",
+        "profiles": {
+            "deepseek_public": {
+                "name": "DeepSeek",
+                "endpoint": "https://api.deepseek.com/v1/chat/completions",
+                "model": "deepseek-chat"
+            },
+            "local_qwen": {
+                "name": "内网 Qwen3-VL-8B 服务",
+                "endpoint": "http://10.37.87.15:4000/v1/chat/completions",
+                "model": "qwen3-vl-8b"
+            }
+        }
+    },
+    "chart_grammars": {
+        "pareto": {
+            "type": "statistical",
+            "data_structure": "Array<{name: string, value: number}>",
+            "logic": "Auto-sort descending, calculate cumulative percentage, draw dual-axis chart with 80% markline."
+        },
+        "dsl_specification": {
+            "version": "1.0",
+            "rules": [
+                "1. 色彩配置: 使用 'Color[键名]: #16进制代码'。支持键名: BoneLine(脊椎线), CaseLine(鱼刺线), Title(标题字), Case(节点字), Start(鱼头), End(鱼尾)。",
+                "2. 标题设定: 使用 'Title: [文字]' 定义鱼头（即最终要解决的问题/结果）。",
+                "3. 层级逻辑: 使用 '#' 表示大骨类别 (Level 1), '##' 表示一级原因 (Level 2), '###' 表示二级详情 (Level 3), 最高支持 6 级嵌套。",
+                "4. 生长规则: 系统会自动处理左右交错与上下镜像生长，AI 仅需负责输出清晰的因果逻辑树。",
+                "5. 配色建议: 故障分析推荐红色系 (#ef4444)，标准管理推荐蓝色系 (#1d4ed8)，商务讨论推荐沉稳灰色系 (#475569)。"
+            ],
+            "few_shot_examples": [
+                {
+                    "scenario": "工业制造 - 质量异常分析",
+                    "input": "分析造成“注塑件表面缩水”的原因，按人机料法环维度展开。",
+                    "output": "```fishbone\nColor[Start]: #1e293b // 沉稳的深蓝色鱼头\nColor[Case]: #1d4ed8 // 专业蓝文字\nTitle: 注塑件表面缩水故障\n\n# 人 (Man) - 操作与技能\n## 调机参数设置不当\n### 保压压力过低\n### 保压时间不足\n## 巡检不及时\n\n# 机 (Machine) - 设备状态\n## 料筒加热温度偏移\n## 模具冷却水道阻塞\n\n# 料 (Material) - 配方与物性\n## 材料缩水率不均匀\n## 回料添加比例过高\n\n# 法 (Method) - 工艺标准\n## 工艺参数未标准化\n```"
+                },
+                {
+                    "scenario": "互联网研发 - 系统稳定性分析",
+                    "input": "深入分析生产环境下“支付系统响应缓慢”的根因。",
+                    "output": "```fishbone\nColor[BoneLine]: #ef4444 // 预警红线条\nTitle: 支付系统响应延迟\n\n# 服务层\n## 依赖接口超时\n### 银行网关响应慢\n## 内存泄露导致频繁GC\n\n# 数据库层\n## 慢SQL查询\n### 缺少覆盖索引\n## 数据库死锁\n\n# 基础架构\n## 负载均衡连接数超限\n## 跨机房带宽瓶颈\n```"
+                }
+            ]
+        }
+    },
+    "prompt_templates": {
+        "intent_analysis": "Identify if the user wants a Pareto chart for frequency analysis or a Fishbone for root cause analysis. Extract structured data from the text."
+    }
+}
