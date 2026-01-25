@@ -21,7 +21,22 @@
         "pareto": {
             "type": "statistical",
             "data_structure": "Array<{name: string, value: number}>",
-            "logic": "Auto-sort descending, calculate cumulative percentage, draw dual-axis chart with 80% markline."
+            "logic": "Auto-sort descending, calculate cumulative percentage, draw dual-axis chart with 80% markline.",
+            "dsl_specification": {
+                "rules": [
+                    "Title: 标题内容 - 设置图表主标题",
+                    "Color[Title]: #HEX - 标题颜色",
+                    "Color[Bar]: #HEX - 柱形颜色",
+                    "Color[Line]: #HEX - 累计曲线颜色",
+                    "Color[MarkLine]: #HEX - 80% 关键线颜色",
+                    "Font[Title]: Size - 主标题字号",
+                    "Font[Base]: Size - 全局轴坐标字号",
+                    "Font[Bar]: Size - 柱形字号",
+                    "Font[Line]: Size - 曲线字号",
+                    "Decimals: 0-4 - 累计百分比小数点位数",
+                    "- 项目名称: 频数 - 数据项定义"
+                ]
+            }
         },
         "dsl_specification": {
             "version": "1.0",
