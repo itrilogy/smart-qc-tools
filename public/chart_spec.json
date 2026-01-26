@@ -1,7 +1,7 @@
 {
     "project": "Smart QC Tools",
-    "version": "1.0",
-    "description": "Chart specification for LLM-driven automated charting.",
+    "version": "2.0",
+    "description": "Chart specification and few-shot examples for LLM-driven automated charting.",
     "ai_config": {
         "active_profile": "deepseek_public",
         "profiles": {
@@ -18,50 +18,122 @@
         }
     },
     "chart_grammars": {
-        "pareto": {
-            "type": "statistical",
-            "data_structure": "Array<{name: string, value: number}>",
-            "logic": "Auto-sort descending, calculate cumulative percentage, draw dual-axis chart with 80% markline.",
+        "fishbone": {
+            "type": "logic",
+            "intent_trigger": [
+                "原因分析",
+                "因果",
+                "为什么",
+                "root cause",
+                "fishbone"
+            ],
             "dsl_specification": {
                 "rules": [
-                    "Title: 标题内容 - 设置图表主标题",
-                    "Color[Title]: #HEX - 标题颜色",
-                    "Color[Bar]: #HEX - 柱形颜色",
-                    "Color[Line]: #HEX - 累计曲线颜色",
-                    "Color[MarkLine]: #HEX - 80% 关键线颜色",
-                    "Font[Title]: Size - 主标题字号",
-                    "Font[Base]: Size - 全局轴坐标字号",
-                    "Font[Bar]: Size - 柱形字号",
-                    "Font[Line]: Size - 曲线字号",
-                    "Decimals: 0-4 - 累计百分比小数点位数",
-                    "- 项目名称: 频数 - 数据项定义"
+                    "Color[Start/End/Title/Case/BoneLine/CaseLine]: #HEX - 色彩配置",
+                    "Title: [文字] - 定义中心问题",
+                    "# 大骨(L1) ## 中骨(L2) ### 小骨(L3) - 最高6级递归",
+                    "经典维度: 人机料法环(5M1E), 4P, 系统分层"
+                ],
+                "few_shot_examples": [
+                    {
+                        "scenario": "工业制造 - 质量异常",
+                        "input": "分析造成“注塑件表面缩水”的原因，按人机料法环维度展开。",
+                        "output": "Title: 注塑件表面缩水故障\nColor[Start]: #ef4444\nColor[Title]: #1e293b\n\n# 人 (Man)\n## 调机参数设置不当\n### 保压压力过低\n## 巡检不及时\n\n# 机 (Machine)\n## 料筒加热温度偏移\n## 模具冷却水道阻塞\n\n# 料 (Material)\n## 材料缩水率不均匀"
+                    },
+                    {
+                        "scenario": "互联网 - 系统故障",
+                        "input": "分析“支付系统响应缓慢”的根因。",
+                        "output": "Title: 支付系统响应延迟\nColor[BoneLine]: #ef4444\n\n# 服务层\n## 依赖接口超时\n### 银行网关响应慢\n## 内存泄露\n\n# 数据库层\n## 慢SQL查询\n### 缺少覆盖索引\n## 死锁"
+                    }
                 ]
             }
         },
-        "dsl_specification": {
-            "version": "1.0",
-            "rules": [
-                "1. 色彩配置: 使用 'Color[键名]: #16进制代码'。支持键名: BoneLine(脊椎线), CaseLine(鱼刺线), Title(标题字), Case(节点字), Start(鱼头), End(鱼尾)。",
-                "2. 标题设定: 使用 'Title: [文字]' 定义鱼头（即最终要解决的问题/结果）。",
-                "3. 层级逻辑: 使用 '#' 表示大骨类别 (Level 1), '##' 表示一级原因 (Level 2), '###' 表示二级详情 (Level 3), 最高支持 6 级嵌套。",
-                "4. 生长规则: 系统会自动处理左右交错与上下镜像生长，AI 仅需负责输出清晰的因果逻辑树。",
-                "5. 配色建议: 故障分析推荐红色系 (#ef4444)，标准管理推荐蓝色系 (#1d4ed8)，商务讨论推荐沉稳灰色系 (#475569)。"
+        "pareto": {
+            "type": "statistical",
+            "intent_trigger": [
+                "二八定律",
+                "重点分析",
+                "主要原因",
+                "频数排名",
+                "pareto"
             ],
-            "few_shot_examples": [
-                {
-                    "scenario": "工业制造 - 质量异常分析",
-                    "input": "分析造成“注塑件表面缩水”的原因，按人机料法环维度展开。",
-                    "output": "```fishbone\nColor[Start]: #1e293b // 沉稳的深蓝色鱼头\nColor[Case]: #1d4ed8 // 专业蓝文字\nTitle: 注塑件表面缩水故障\n\n# 人 (Man) - 操作与技能\n## 调机参数设置不当\n### 保压压力过低\n### 保压时间不足\n## 巡检不及时\n\n# 机 (Machine) - 设备状态\n## 料筒加热温度偏移\n## 模具冷却水道阻塞\n\n# 料 (Material) - 配方与物性\n## 材料缩水率不均匀\n## 回料添加比例过高\n\n# 法 (Method) - 工艺标准\n## 工艺参数未标准化\n```"
-                },
-                {
-                    "scenario": "互联网研发 - 系统稳定性分析",
-                    "input": "深入分析生产环境下“支付系统响应缓慢”的根因。",
-                    "output": "```fishbone\nColor[BoneLine]: #ef4444 // 预警红线条\nTitle: 支付系统响应延迟\n\n# 服务层\n## 依赖接口超时\n### 银行网关响应慢\n## 内存泄露导致频繁GC\n\n# 数据库层\n## 慢SQL查询\n### 缺少覆盖索引\n## 数据库死锁\n\n# 基础架构\n## 负载均衡连接数超限\n## 跨机房带宽瓶颈\n```"
-                }
-            ]
+            "dsl_specification": {
+                "rules": [
+                    "Title: [文字]",
+                    "Color[Bar/Line/MarkLine]: #HEX",
+                    "Font[Title/Base/Bar]: [Size]",
+                    "- [Name]: [Value] - 数据行 (无需排序, 系统自动降序)"
+                ],
+                "few_shot_examples": [
+                    {
+                        "scenario": "客诉分析",
+                        "input": "统计本月客诉原因：物流破损45起，发错货12起，质量问题8起，其他5起。",
+                        "output": "Title: 本月客诉原因分析\nColor[Bar]: #3b82f6\nColor[Line]: #f59e0b\nDecimals: 1\n\n- 物流破损: 45\n- 发错货: 12\n- 质量问题: 8\n- 其他: 5"
+                    },
+                    {
+                        "scenario": "成本分布",
+                        "input": "研发费用占比最大(120万)，其次是市场推广(50万)和行政支出(15万)。",
+                        "output": "Title: 部门费用支出分析\nColor[Bar]: #10b981\nColor[MarkLine]: #ef4444\n\n- 研发费用: 120\n- 市场推广: 50\n- 行政支出: 15"
+                    }
+                ]
+            }
+        },
+        "histogram": {
+            "type": "statistical",
+            "intent_trigger": [
+                "分布",
+                "能力分析",
+                "正态",
+                "histogram",
+                "CPK"
+            ],
+            "dsl_specification": {
+                "rules": [
+                    "Title: [文字]",
+                    "USL/LSL/Target: [Value] - 规格线",
+                    "Bins: auto/N - 分组数",
+                    "ShowCurve: true/false - 正态曲线",
+                    "- [Value] - 原始数据只需数值"
+                ],
+                "few_shot_examples": [
+                    {
+                        "scenario": "尺寸测量",
+                        "input": "抽检10个产品直径，规格10.0±0.5。数据：10.1, 9.9, 10.2, 9.8, 10.0, 10.3, 9.7, 10.1, 9.9, 10.0",
+                        "output": "Title: 产品直径分布分析\nTarget: 10.0\nUSL: 10.5\nLSL: 9.5\nBins: auto\nShowCurve: true\nColor[Bar]: #6366f1\n\n# 样本数据\n- 10.1\n- 9.9\n- 10.2\n- 9.8\n- 10.0\n- 10.3\n- 9.7\n- 10.1\n- 9.9\n- 10.0"
+                    }
+                ]
+            }
+        },
+        "scatter": {
+            "type": "statistical",
+            "intent_trigger": [
+                "相关性",
+                "回归",
+                "散点",
+                "气泡",
+                "scatter"
+            ],
+            "dsl_specification": {
+                "rules": [
+                    "Title: [文字]",
+                    "XAxis/YAxis/ZAxis: [Label]",
+                    "ShowTrend: true/false - 趋势线",
+                    "Font[Title/Base]: [Size] - 字号控制",
+                    "- x, y, [z] - 数据行 (z为气泡大小)"
+                ],
+                "few_shot_examples": [
+                    {
+                        "scenario": "相关性分析",
+                        "input": "分析门店客流(X)和销售额(Y)的关系。A店(100人, 5000元), B店(150人, 7000元), C店(80人, 3000元)。",
+                        "output": "Title: 客流与销售额相关性分析\nXAxis: 客流量 (人)\nYAxis: 销售额 (元)\nShowTrend: true\nColor[Point]: #3b82f6\nColor[Trend]: #ef4444\n\n- 100, 5000\n- 150, 7000\n- 80, 3000"
+                    },
+                    {
+                        "scenario": "多维气泡图",
+                        "input": "对比竞品参数：价格(X) vs 性能分(Y) vs 市场份额(Size)。A(200, 80, 15%), B(150, 70, 30%), C(300, 95, 10%)。",
+                        "output": "Title: 竞品市场格局分析\nXAxis: 价格 (元)\nYAxis: 性能评分\nZAxis: 市场份额 (%)\nOpacity: 0.8\nSize[Base]: 10\n\n- 200, 80, 15\n- 150, 70, 30\n- 300, 95, 10"
+                    }
+                ]
+            }
         }
-    },
-    "prompt_templates": {
-        "intent_analysis": "Identify if the user wants a Pareto chart for frequency analysis or a Fishbone for root cause analysis. Extract structured data from the text."
     }
 }

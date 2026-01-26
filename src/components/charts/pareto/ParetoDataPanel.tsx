@@ -14,31 +14,7 @@ interface ParetoDataPanelProps {
     onShowLineChange: (val: boolean) => void;
 }
 
-const PARETO_SYSTEM_PROMPT = `# 角色：排列图数据生成专家
 
-## 核心目标
-将用户的问题描述转化为符合 Smart QC Tools 规范的排列图 DSL 脚本。
-
-## 语法规范
-Title: 标题内容
-Color[Title]: #HEX
-Color[Bar]: #HEX
-Color[Line]: #HEX
-Color[MarkLine]: #HEX
-Font[Title]: Size
-Font[Bar]: Size
-Font[Line]: Size
-Font[Base]: Size
-Decimals: N
-
-- 项目名称: 频数
-
-## 逻辑要求
-1. 识别核心分类项并自动分配频数。
-2. 数据需符合 Pareto 原则（二八定律）。
-
-## 输出格式
-仅输出纯 DSL 代码，严禁包含 markdown 标记。`;
 
 export function ParetoDataPanel({ data, onChange, styles, showLine, onShowLineChange }: ParetoDataPanelProps) {
     const [activeTab, setActiveTab] = useState<'manual' | 'dsl' | 'ai'>('manual');
@@ -80,7 +56,7 @@ export function ParetoDataPanel({ data, onChange, styles, showLine, onShowLineCh
     useEffect(() => {
         fetch('/chart_spec.json')
             .then(res => res.json())
-            .then(data => setAiConfig(data.ai_config))
+            .then(data => setAiConfig(data)) // Store full config
             .catch(err => console.error('加载 AI 配置失败:', err));
     }, []);
 
@@ -182,7 +158,27 @@ export function ParetoDataPanel({ data, onChange, styles, showLine, onShowLineCh
 
         setIsGenerating(true);
         try {
-            const activeProfile = aiConfig.profiles[aiConfig.active_profile];
+            const config = aiConfig.ai_config;
+            const grammar = aiConfig.chart_grammars?.pareto;
+            const activeProfile = config.profiles[config.active_profile];
+            const rules = grammar?.dsl_specification?.rules || [];
+            const examples = grammar?.dsl_specification?.few_shot_examples || [];
+
+            const systemPrompt = `# 角色：排列图数据生成专家
+## 核心目标
+将用户的问题描述转化为符合 Smart QC Tools 规范的排列图 DSL 脚本。
+
+## 语法规范
+${rules.join('\n')}
+
+## Few-Shot 示例
+${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\n\n')}
+
+## 输出格式
+1. 仅输出纯 DSL 代码。
+2. 严禁包含 markdown 标记（如 \`\`\`pareto 或 \`\`\`）。
+3. 严禁包含任何解释性文字或开场白。`;
+
             const response = await fetch(activeProfile.endpoint, {
                 method: 'POST',
                 headers: {
@@ -192,7 +188,7 @@ export function ParetoDataPanel({ data, onChange, styles, showLine, onShowLineCh
                 body: JSON.stringify({
                     model: activeProfile.model,
                     messages: [
-                        { role: 'system', content: PARETO_SYSTEM_PROMPT },
+                        { role: 'system', content: systemPrompt },
                         { role: 'user', content: aiInput }
                     ]
                 })
@@ -214,7 +210,7 @@ export function ParetoDataPanel({ data, onChange, styles, showLine, onShowLineCh
         }
     };
 
-    const activeProfileName = aiConfig?.profiles[aiConfig?.active_profile]?.name || '加载中...';
+    const activeProfileName = aiConfig?.ai_config?.profiles[aiConfig?.ai_config?.active_profile]?.name || '加载中...';
 
     return (
         <div className="flex flex-col h-full bg-white relative">

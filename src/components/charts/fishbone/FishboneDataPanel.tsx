@@ -10,80 +10,7 @@ interface FishboneDataPanelProps {
 }
 
 // Fishbone DSL 专用 System Prompt
-const FISHBONE_SYSTEM_PROMPT = `# 角色：鱼骨图 DSL 生成专家
 
-## 核心目标
-你是一个精通鱼骨图因果分析的专家。你的任务是将用户的问题描述转化为**语法完美**、**逻辑清晰**的鱼骨图 DSL 代码。
-
-## DSL 语法规范
-
-### 1. 色彩配置
-使用 'Color[键名]: #16进制代码'。支持键名:
-- BoneLine(脊椎线) - CaseLine(鱼刺线) - Title(标题字) - Case(节点字) - Start(鱼头) - End(鱼尾)
-配色建议：故障分析用红色系(#ef4444)，标准管理用蓝色系(#1d4ed8)，商务用灰色系(#475569)
-
-### 2. 标题设定
-使用 'Title: [文字]' 定义鱼头（最终要解决的问题/结果）
-
-### 3. 层级逻辑
-- '#' = 大骨类别 (Level 1)
-- '##' = 一级原因 (Level 2)
-- '###' = 二级详情 (Level 3)
-- 最高支持 6 级嵌套
-
-### 4. 经典分析维度
-- 人机料法环（5M1E）：Man, Machine, Material, Method, Environment, Measurement
-- 4P：Product, Price, Place, Promotion
-- 系统分层：服务层、数据层、基础架构等
-
-## Few-Shot 示例
-
-**示例 1：工业制造场景**
-用户输入：分析造成"注塑件表面缩水"的原因
-输出：
-\`\`\`
-Color[Start]: #1e293b
-Color[Case]: #1d4ed8
-Title: 注塑件表面缩水故障
-
-# 人 (Man) - 操作与技能
-## 调机参数设置不当
-### 保压压力过低
-### 保压时间不足
-## 巡检不及时
-
-# 机 (Machine) - 设备状态
-## 料筒加热温度偏移
-## 模具冷却水道阻塞
-
-# 料 (Material) - 配方与物性
-## 材料缩水率不均匀
-## 回料添加比例过高
-\`\`\`
-
-**示例 2：系统稳定性场景**
-用户输入：分析"支付系统响应缓慢"的根因
-输出：
-\`\`\`
-Color[BoneLine]: #ef4444
-Title: 支付系统响应延迟
-
-# 服务层
-## 依赖接口超时
-### 银行网关响应慢
-## 内存泄露导致频繁GC
-
-# 数据库层
-## 慢SQL查询
-### 缺少覆盖索引
-## 数据库死锁
-\`\`\`
-
-## 输出要求
-1. 仅输出纯DSL代码
-2. 不要包含 markdown 的 \`\`\` 标记
-3. 不要包含任何解释性文字
-4. 确保层级逻辑清晰、因果关系合理`;
 
 export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
     const [dsl, setDsl] = useState(INITIAL_DSL_CONTENT);
@@ -110,7 +37,7 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
                 if (!res.ok) throw new Error('配置文件加载失败');
                 return res.json();
             })
-            .then(data => setAiConfig(data.ai_config))
+            .then(data => setAiConfig(data))
             .catch(err => console.error('加载配置失败:', err));
     }, []);
 
@@ -195,7 +122,10 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
             return;
         }
 
-        const activeProfile = aiConfig.profiles[aiConfig.active_profile];
+        const config = aiConfig.ai_config;
+        const grammar = aiConfig.chart_grammars?.fishbone;
+        const activeProfile = config.profiles[config.active_profile];
+
         if (!activeProfile) {
             alert('未找到有效的 AI 服务配置');
             return;
@@ -205,6 +135,25 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
         setAiOutput('');
 
         try {
+            const rules = grammar?.dsl_specification?.rules || [];
+            const examples = grammar?.dsl_specification?.few_shot_examples || [];
+
+            const systemPrompt = `# 角色：鱼骨图 DSL 生成专家
+## 核心目标
+你是一个精通鱼骨图因果分析的专家。你的任务是将用户的问题描述转化为符合 Smart QC Tools 规范的鱼骨图 DSL 脚本。
+
+## DSL 语法规范
+${rules.join('\n')}
+
+## Few-Shot 示例
+${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\n\n')}
+
+## 输出格式
+1. 仅输出纯 DSL 代码。
+2. 严禁包含 markdown 标记（如 \`\`\`fishbone 或 \`\`\`）。
+3. 严禁包含任何解释性文字或开场白。
+4. 确保层级逻辑清晰、因果关系合理。`;
+
             const response = await fetch(activeProfile.endpoint, {
                 method: 'POST',
                 headers: {
@@ -214,7 +163,7 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
                 body: JSON.stringify({
                     model: activeProfile.model,
                     messages: [
-                        { role: 'system', content: FISHBONE_SYSTEM_PROMPT },
+                        { role: 'system', content: systemPrompt },
                         { role: 'user', content: aiInput }
                     ]
                 })
@@ -239,7 +188,7 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
         }
     };
 
-    const activeProfileName = aiConfig?.profiles[aiConfig?.active_profile]?.name || '加载中...';
+    const activeProfileName = aiConfig?.ai_config?.profiles[aiConfig?.ai_config?.active_profile]?.name || '加载中...';
 
     return (
         <div className="flex flex-col h-full bg-white text-slate-800">
@@ -294,14 +243,6 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
                             语法说明
                         </button>
                     )}
-                    {activeTab === 'ai' && (
-                        <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                            <span style={{ fontSize: '13px', color: '#065f46', fontWeight: '600' }}>
-                                {activeProfileName} (在线)
-                            </span>
-                        </div>
-                    )}
                 </div>
             </div>
 
@@ -325,10 +266,16 @@ export function FishboneDataPanel({ onChange }: FishboneDataPanelProps) {
                 ) : (
                     <div className="flex-1 flex flex-col p-6 gap-6 overflow-hidden bg-slate-50/50">
                         <div className="flex flex-col gap-3 shrink-0">
-                            <label className="font-bold flex items-center gap-2" style={{ fontSize: '16px', color: '#1e293b' }}>
-                                <Sparkles size={18} className="text-blue-500" />
-                                问题描述
-                            </label>
+                            <div className="flex items-center justify-between">
+                                <label className="font-bold flex items-center gap-2" style={{ fontSize: '16px', color: '#1e293b' }}>
+                                    <Sparkles size={18} className="text-blue-500" />
+                                    问题描述
+                                </label>
+                                <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                    <span style={{ fontSize: '12px', color: '#065f46', fontWeight: '600' }}>{activeProfileName} (在线)</span>
+                                </div>
+                            </div>
                             <textarea
                                 value={aiInput}
                                 onChange={(e) => setAiInput(e.target.value)}

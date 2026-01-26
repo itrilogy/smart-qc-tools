@@ -30,12 +30,12 @@ const TOOLS = [
     color: 'bg-indigo-500'
   },
   {
-    id: 'control',
-    name: '控制图',
-    enName: 'Control Chart',
-    desc: '判断过程是否处于受控状态，自动计算 UCL/LCL 并标记异常。',
-    icon: TrendingUp,
-    href: '/control',
+    id: 'scatter',
+    name: '散点图',
+    enName: 'Scatter Plot',
+    desc: '分析两个变量之间的相关性，支持多维度气泡展示与趋势回归。',
+    icon: ScatterChart,
+    href: '/scatter',
     color: 'bg-amber-500'
   }
 ];

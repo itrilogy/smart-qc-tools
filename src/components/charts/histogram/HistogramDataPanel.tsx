@@ -12,35 +12,7 @@ interface HistogramDataPanelProps {
     styles: HistogramChartStyles;
 }
 
-const HISTOGRAM_SYSTEM_PROMPT = `# 角色：直方图数据生成专家
 
-## 核心目标
-将用户的数据描述转化为符合 Smart QC Tools 规范的直方图 DSL 脚本。
-
-## 语法规范
-Title: 标题内容
-Color[Bar]: #HEX
-Color[USL]: #HEX
-Color[LSL]: #HEX
-Color[Target]: #HEX
-Color[Curve]: #HEX
-USL: 10.5
-LSL: 9.5
-Target: 10.0
-Bins: auto | N
-ShowCurve: true | false
-
-# 原始数据
-- 10.2
-- 9.8
-...
-
-## 逻辑要求
-1. 生成一组符合描述分布特征（如正态、偏态）的随机数据（20-50个样本）。
-2. 设置合理的规格限。
-
-## 输出格式
-仅输出纯 DSL 代码，严禁包含 markdown 标记。`;
 
 export function HistogramDataPanel({ data, onChange, styles }: HistogramDataPanelProps) {
     const [activeTab, setActiveTab] = useState<'manual' | 'dsl' | 'ai'>('manual');
@@ -73,7 +45,7 @@ export function HistogramDataPanel({ data, onChange, styles }: HistogramDataPane
     useEffect(() => {
         fetch('/chart_spec.json')
             .then(res => res.json())
-            .then(data => setAiConfig(data.ai_config))
+            .then(data => setAiConfig(data)) // Store full data
             .catch(err => console.error('加载 AI 配置失败:', err));
     }, []);
 
@@ -199,7 +171,27 @@ export function HistogramDataPanel({ data, onChange, styles }: HistogramDataPane
 
         setIsGenerating(true);
         try {
-            const activeProfile = aiConfig.profiles[aiConfig.active_profile];
+            const config = aiConfig.ai_config;
+            const grammar = aiConfig.chart_grammars?.histogram;
+            const activeProfile = config.profiles[config.active_profile];
+            const rules = grammar?.dsl_specification?.rules || [];
+            const examples = grammar?.dsl_specification?.few_shot_examples || [];
+
+            const systemPrompt = `# 角色：直方图数据生成专家
+## 核心目标
+将用户的数据描述转化为符合 Smart QC Tools 规范的直方图 DSL 脚本。
+
+## 语法规范
+${rules.join('\n')}
+
+## Few-Shot 示例
+${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\n\n')}
+
+## 输出格式
+1. 仅输出纯 DSL 代码。
+2. 严禁包含 markdown 标记（如 \`\`\`histogram 或 \`\`\`）。
+3. 严禁包含任何解释性文字或开场白。`;
+
             const response = await fetch(activeProfile.endpoint, {
                 method: 'POST',
                 headers: {
@@ -209,7 +201,7 @@ export function HistogramDataPanel({ data, onChange, styles }: HistogramDataPane
                 body: JSON.stringify({
                     model: activeProfile.model,
                     messages: [
-                        { role: 'system', content: HISTOGRAM_SYSTEM_PROMPT },
+                        { role: 'system', content: systemPrompt },
                         { role: 'user', content: aiInput }
                     ]
                 })
@@ -231,7 +223,7 @@ export function HistogramDataPanel({ data, onChange, styles }: HistogramDataPane
         }
     };
 
-    const activeProfileName = aiConfig?.profiles[aiConfig?.active_profile]?.name || '加载中...';
+    const activeProfileName = aiConfig?.ai_config?.profiles[aiConfig?.ai_config?.active_profile]?.name || '加载中...';
 
     return (
         <div className="flex flex-col h-full bg-white relative">
@@ -457,13 +449,13 @@ export function HistogramDataPanel({ data, onChange, styles }: HistogramDataPane
                     <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto bg-slate-50/30">
                         <div className="flex flex-col gap-4">
                             <div className="flex items-center justify-between">
-                                <label className="font-bold flex items-center gap-2 text-slate-800">
+                                <label className="font-bold flex items-center gap-2" style={{ fontSize: '16px', color: '#1e293b' }}>
                                     <Sparkles size={18} className="text-blue-500" />
                                     统计场景描述
                                 </label>
                                 <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100">
                                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-                                    <span className="text-xs text-emerald-800 font-semibold">{activeProfileName}</span>
+                                    <span style={{ fontSize: '12px', color: '#065f46', fontWeight: '600' }}>{activeProfileName} (在线)</span>
                                 </div>
                             </div>
                             <textarea
