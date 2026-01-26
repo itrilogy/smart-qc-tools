@@ -11,7 +11,7 @@ export function SidebarHeader({ title, subtitle }: { title: string, subtitle?: s
     );
 }
 
-export function SidebarSection({ title, children }: { title: string, children: React.ReactNode }) {
+export function SidebarSection({ title, children }: { title: React.ReactNode, children: React.ReactNode }) {
     return (
         <div className="px-5 py-6 border-b border-slate-50 last:border-0">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">{title}</h3>
