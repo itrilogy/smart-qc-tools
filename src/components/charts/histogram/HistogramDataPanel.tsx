@@ -257,7 +257,7 @@ ${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\
             {/* Content */}
             <div className="flex-1 overflow-hidden flex flex-col">
                 {activeTab === 'manual' && (
-                    <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
                         <SidebarSection title="图表基本信息">
                             <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 space-y-4">
                                 <div className="space-y-2">
@@ -294,13 +294,16 @@ ${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\
                         <SidebarSection title="规格与分组配置">
                             <div className="space-y-4">
 
-                                {/* 规格限说明卡片 */}
-                                <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100 text-sm text-slate-600 leading-relaxed">
-                                    <ul className="space-y-1 text-slate-500 text-xs">
-                                        <li><strong className="text-red-500">USL</strong>: 上规格限，超过此值视为不合格</li>
-                                        <li><strong className="text-red-500">LSL</strong>: 下规格限，低于此值视为不合格</li>
-                                        <li><strong className="text-green-600">Target</strong>: 生产追求的理想中心值</li>
-                                    </ul>
+                                {/* 规格限说明 - 精简设计 */}
+                                <div className="px-1 text-[11px] text-slate-400 font-medium leading-relaxed">
+                                    <p className="flex items-center gap-2">
+                                        <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                                        <span><strong className="text-red-500">USL/LSL</strong>: 上下规格限 (超出视为不合格)</span>
+                                    </p>
+                                    <p className="flex items-center gap-2 mt-1">
+                                        <span className="w-1 h-1 rounded-full bg-emerald-400"></span>
+                                        <span><strong className="text-emerald-600">Target</strong>: 生产理想中心值</span>
+                                    </p>
                                 </div>
 
                                 {/* USL / LSL / Target 三列布局 */}
@@ -357,7 +360,7 @@ ${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\
                                             {styles.bins === 'auto' ? '自动 (Sturges)' : styles.bins}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-slate-400">点击滑块可切换到手动模式</p>
+                                    <p className="text-[11px] text-slate-400">点击滑块切换至手动模式</p>
                                     <div className="flex items-center gap-3">
                                         <button
                                             onClick={() => onChange(data, { ...styles, bins: 'auto' })}
