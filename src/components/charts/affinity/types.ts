@@ -48,7 +48,7 @@ export interface AffinityChartProps {
 
 // 默认样式配置
 export const DEFAULT_AFFINITY_STYLES: Required<AffinityChartStyles> = {
-    title: '亲和图 (Affinity Diagram)',
+    title: '系统图 / 亲和图 (Affinity Diagram)',
     type: 'Card',
     layout: 'Horizontal',
     titleColor: '#1e293b',

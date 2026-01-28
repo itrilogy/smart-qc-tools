@@ -1,5 +1,5 @@
 /**
- * 亲和图 (Affinity Diagram / KJ法) 渲染组件
+ * 系统图/亲和图 (System / Affinity Diagram) 渲染组件
  */
 import React, { useRef, useImperativeHandle, forwardRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {
@@ -45,7 +45,7 @@ export const AffinityChart = forwardRef<AffinityChartRef, AffinityChartProps>(
                     renderPlateStyle(ctx, data, finalStyles, contentSize);
                 }
                 const link = document.createElement('a');
-                link.download = `亲和图_${Date.now()}.png`;
+                link.download = `系统-亲和图_${Date.now()}.png`;
                 link.href = exportCanvas.toDataURL('image/png');
                 link.click();
             },

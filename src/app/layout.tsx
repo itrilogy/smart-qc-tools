@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`${inter.className} min-h-screen flex flex-col overflow-hidden bg-white`}>
+      <body className={`${inter.className} h-screen flex flex-col overflow-hidden bg-white`}>
         <Header />
         <main className="flex-1 flex flex-col overflow-hidden relative">
           {children}

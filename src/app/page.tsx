@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Network, Activity, TrendingUp, ScatterChart, ArrowRight, Boxes } from "lucide-react";
+import { BarChart3, Network, Activity, TrendingUp, ScatterChart, ArrowRight, Boxes, LineChart } from "lucide-react";
 
 const TOOLS = [
   {
@@ -40,12 +40,21 @@ const TOOLS = [
   },
   {
     id: 'affinity',
-    name: '亲和图',
-    enName: 'Affinity Diagram',
-    desc: '将大量信息进行分组归类的 KJ 法工具，支持树状层级与卡片分组两种模式。',
+    name: '系统/亲和图',
+    enName: 'System / Affinity Diagram',
+    desc: '集成 KJ 法与系统图功能，支持卡片分组归类与树状层级布局，适用于头脑风暴与系统架构分析。',
     icon: Boxes,
     href: '/affinity',
     color: 'bg-orange-500'
+  },
+  {
+    id: 'control',
+    name: '控制图',
+    enName: 'Control Chart',
+    desc: '工业级 SPC 统计工具，自动计算 UCL/LCL，识别异常点并应用 Western-Electric 等判异规则。支持单/多维数据。',
+    icon: LineChart,
+    href: '/control',
+    color: 'bg-rose-500'
   }
 ];
 

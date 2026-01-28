@@ -149,9 +149,9 @@ export const AffinityDataPanel: React.FC<AffinityDataPanelProps> = ({
             const rules = grammar?.dsl_specification?.rules || [];
             const examples = grammar?.dsl_specification?.few_shot_examples || [];
 
-            const systemPrompt = `# 角色：亲和图数据生成专家
+            const systemPrompt = `# 角色：系统图/亲和图数据生成专家
 ## 核心目标
-将用户的问题描述转化为符合 Smart QC Tools 规范的亲和图 DSL 脚本。
+将用户的问题描述转化为符合 Smart QC Tools 规范的系统图/亲和图 DSL 脚本。
 
 ## 语法规范
 ${rules.join('\n')}
@@ -477,7 +477,7 @@ ${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\
                                     <Database size={24} className="text-blue-600" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">Affinity Diagram DSL Spec</h2>
+                                    <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none">System / Affinity DSL Spec</h2>
                                     <p className="text-[10px] font-bold text-slate-400 mt-2 flex items-center gap-2 uppercase tracking-widest font-sans">
                                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></span>
                                         KJ Method Standard v1.2
@@ -520,7 +520,7 @@ ${examples.map((ex: any) => `Input: ${ex.input}\nOutput:\n${ex.output}`).join('\
                             <section className="space-y-6">
                                 <div className="flex items-center gap-3 px-4 py-1.5 bg-blue-50 text-blue-700 rounded-lg w-fit text-[11px] font-black uppercase tracking-[0.2em] shadow-sm">
                                     <Sparkles size={14} />
-                                    KJ Syntax Concept
+                                    System / KJ Syntax Concept
                                 </div>
                                 <div className="p-6 bg-white rounded-2xl border-2 border-blue-50 relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 p-3 bg-blue-50 text-blue-600 rounded-bl-xl font-black text-[10px]">HIERARCHY</div>

@@ -13,7 +13,7 @@ export function Workspace({ sidebarContent, canvasContent, toolbarContent }: Wor
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     return (
-        <div className="flex flex-1 h-[calc(100vh-64px)] overflow-hidden relative bg-white">
+        <div className="flex flex-1 h-full min-h-0 overflow-hidden relative bg-white">
             {/* DataPanel Sidebar - Collapsible */}
             <aside
                 className="bg-white flex flex-col shrink-0 overflow-hidden transition-all duration-300 ease-in-out min-w-0"

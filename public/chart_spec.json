@@ -138,6 +138,7 @@
         "affinity": {
             "type": "logic",
             "intent_trigger": [
+                "系统图",
                 "亲和图",
                 "KJ法",
                 "归纳分组",
@@ -165,6 +166,34 @@
                         "scenario": "产品规划 - 需求梳理",
                         "input": "整理新产品功能需求：用户登录、权限管理、数据导出、报表生成、消息通知。",
                         "output": "Title: 新产品功能需求梳理\nType: Card\nLayout: Horizontal\nColor[Header]: #3b82f6\nColor[Item]: #dbeafe\n\n# 用户系统\n## 用户登录\n## 权限管理\n\n# 数据功能\n## 数据导出\n## 报表生成\n\n# 消息中心\n## 消息通知"
+                    }
+                ]
+            }
+        },
+        "control": {
+            "type": "statistical",
+            "intent_trigger": [
+                "控制图",
+                "SPC",
+                "稳定性",
+                "异常点",
+                "Western-Electric",
+                "control chart"
+            ],
+            "dsl_specification": {
+                "rules": [
+                    "Title: [文字] - 图表主标题",
+                    "Type: [I-MR (仅限单维)/X-bar-R (仅限单维)/T2 (仅限多维)]",
+                    "Size: [N] - 子组大小",
+                    "Rules: [Western-Electric/Nelson/Basic] - 判异规则",
+                    "Color[Line/UCL/CL/Point]: #HEX - 色彩配置",
+                    "[series]: [名称] ... [/series] - 数据序列块"
+                ],
+                "few_shot_examples": [
+                    {
+                        "scenario": "单维过程监控",
+                        "input": "分析轴承加工的稳定性，数据：10.02, 10.05, 9.98, 10.01, 10.03。",
+                        "output": "Title: 轴承加工稳定性监控\nType: I-MR (仅限单维)\nRules: Western-Electric\n\n[series]: 直径测量值\n10.02\n10.05\n9.98\n10.01\n10.03\n[/series]"
                     }
                 ]
             }
