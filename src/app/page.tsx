@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Network, Activity, TrendingUp, ScatterChart, ArrowRight } from "lucide-react";
+import { BarChart3, Network, Activity, TrendingUp, ScatterChart, ArrowRight, Boxes } from "lucide-react";
 
 const TOOLS = [
   {
@@ -37,6 +37,15 @@ const TOOLS = [
     icon: ScatterChart,
     href: '/scatter',
     color: 'bg-amber-500'
+  },
+  {
+    id: 'affinity',
+    name: '亲和图',
+    enName: 'Affinity Diagram',
+    desc: '将大量信息进行分组归类的 KJ 法工具，支持树状层级与卡片分组两种模式。',
+    icon: Boxes,
+    href: '/affinity',
+    color: 'bg-orange-500'
   }
 ];
 

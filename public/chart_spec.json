@@ -134,6 +134,40 @@
                     }
                 ]
             }
+        },
+        "affinity": {
+            "type": "logic",
+            "intent_trigger": [
+                "亲和图",
+                "KJ法",
+                "归纳分组",
+                "头脑风暴",
+                "分类汇总",
+                "affinity"
+            ],
+            "dsl_specification": {
+                "rules": [
+                    "Title: [文字] - 主标题",
+                    "Type: Label/Card - 图表类型 (Label=树状层级, Card=卡片分组)",
+                    "Layout: Vertical/Horizontal - 布局方向",
+                    "Color[Title/Header/Card/Item/Line/Border]: #HEX - 色彩配置",
+                    "Font[Title/Header/Item]: [Size] - 字号控制",
+                    "# L1 ## L2 ### L3 #### L4 - 层级语法 (最高4级)",
+                    "Item: {ID}, {内容}, {父ID?} - 精确定义语法"
+                ],
+                "few_shot_examples": [
+                    {
+                        "scenario": "团队管理 - 效率提升",
+                        "input": "用亲和图整理提升团队效率的想法：简化审批流程、引入自动化工具、每日站会、定期回顾、内部培训。",
+                        "output": "Title: 如何提升团队效率\nType: Card\nLayout: Horizontal\nColor[Header]: #f59e0b\n\n# 流程优化\n## 简化审批流程\n## 引入自动化工具\n\n# 沟通改进\n## 每日站会\n## 定期回顾\n\n# 技能提升\n## 内部培训"
+                    },
+                    {
+                        "scenario": "产品规划 - 需求梳理",
+                        "input": "整理新产品功能需求：用户登录、权限管理、数据导出、报表生成、消息通知。",
+                        "output": "Title: 新产品功能需求梳理\nType: Card\nLayout: Horizontal\nColor[Header]: #3b82f6\nColor[Item]: #dbeafe\n\n# 用户系统\n## 用户登录\n## 权限管理\n\n# 数据功能\n## 数据导出\n## 报表生成\n\n# 消息中心\n## 消息通知"
+                    }
+                ]
+            }
         }
     }
 }
