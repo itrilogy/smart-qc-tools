@@ -1,0 +1,31 @@
+# dependencies
+node_modules
+.next
+out
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# git
+.git
+.gitignore
+
+# docker
+Dockerfile
+docker-compose.yml
+docker-compose.yaml
+
+# others
+README.md
+LICENSE
+.vscode
+.DS_Store
