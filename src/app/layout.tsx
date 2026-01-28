@@ -6,8 +6,8 @@ import { Header } from "@/components/layout/Header";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "QC Tools - Smart Chart Generator",
-  description: "Generate professional QC charts like Pareto, Fishbone, Histogram effortlessly.",
+  title: "Smart QC Tools - Industrial Logic Factory",
+  description: "Generate professional QC charts like Pareto, Affinity, Fishbone effortlessly.",
 };
 
 export default function RootLayout({
