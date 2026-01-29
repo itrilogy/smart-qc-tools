@@ -289,6 +289,16 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
         }));
 
         useEffect(() => {
+            if (!containerRef.current) return;
+            const resizeObserver = new ResizeObserver((entries) => {
+                const { width, height } = entries[0].contentRect;
+                if (width > 0 && height > 0) setDimensions({ width, height });
+            });
+            resizeObserver.observe(containerRef.current);
+            return () => resizeObserver.disconnect();
+        }, []);
+
+        useEffect(() => {
             draw(false);
         }, [draw]);
 
