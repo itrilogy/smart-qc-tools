@@ -448,7 +448,7 @@ Color[Point]: #1d4ed8
 1. **环境准备**: 确保已安装 Node.js 18+
 2. **安装依赖**:
    ```bash
-   npm install
+   npm install --legacy-peer-deps
    ```
 3. **本地开发**:
    ```bash
