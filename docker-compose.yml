@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  smart-qc-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smart-qc-tools
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      # Map the chart specification for easy runtime updates without rebuild
+      - ./public/chart_spec.json:/app/public/chart_spec.json
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

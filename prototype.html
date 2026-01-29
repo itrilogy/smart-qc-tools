@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QC Tools Prototype</title>
+    <style>
+        :root {
+            --primary-color: #2563eb; /* Royal Blue */
+            --bg-color: #f8fafc;
+            --header-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 防止整个页面滚动 */
+        }
+
+        /* Top Navigation Bar */
+        .header {
+            height: 64px;
+            background-color: var(--header-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-primary);
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-outline {
+            border-color: var(--border-color);
+            background: white;
+            color: var(--text-primary);
+        }
+        .btn-outline:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Workspace Area */
+        .workspace {
+            flex: 1; /* 占满剩余高度 */
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Left Panel: Data/Config */
+        .panel-left {
+            width: 360px;
+            background: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        /* Mock Table Styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table th, .data-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .data-table input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+        }
+        .data-table input:focus {
+            background: #eff6ff;
+        }
+
+        /* Right Panel: Canvas */
+        .canvas-area {
+            flex: 1;
+            background-color: #f1f5f9;
+            background-image: 
+                radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* Simple Fishbone Mock Visual */
+        .fishbone-mock {
+            width: 600px;
+            height: 300px;
+            position: relative;
+            border-bottom: 2px solid #333; /* Main bone */
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .fishbone-head {
+            width: 0; 
+            height: 0; 
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-left: 30px solid #333;
+            margin-left: 10px;
+            position: absolute;
+            right: -40px;
+        }
+        .fishbone-label {
+            position: absolute;
+            right: -100px;
+            font-weight: bold;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .toolbar {
+            position: absolute;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 8px;
+        }
+        .tool-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .tool-btn:hover {
+            background-color: #f8fafc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Top Navigation Bar -->
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon">QC</div>
+            <span>Smart Tools</span>
+        </div>
+
+        <nav class="nav-menu">
+            <a class="nav-item active" onclick="switchTab(this, 'fishbone')">鱼骨图</a>
+            <a class="nav-item" onclick="switchTab(this, 'pareto')">排列图</a>
+            <a class="nav-item" onclick="switchTab(this, 'histogram')">直方图</a>
+            <a class="nav-item" onclick="switchTab(this, 'control')">控制图</a>
+            <a class="nav-item" onclick="switchTab(this, 'scatter')">散布图</a>
+        </nav>
+
+        <div class="actions">
+            <button class="btn btn-outline">使用帮助</button>
+            <button class="btn btn-primary">导出图表</button>
+        </div>
+    </header>
+
+    <!-- 2. Main Workspace -->
+    <div class="workspace">
+        
+        <!-- Left: Data Input Area -->
+        <aside class="panel-left">
+            <div class="panel-header">
+                <span>数据/参数录入</span>
+                <span style="font-size: 12px; color: var(--text-secondary);">自动保存</span>
+            </div>
+            <div class="panel-content" id="panel-content">
+                <!-- Content injected via JS based on tab -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:500;">主骨 (问题核心)</label>
+                    <input type="text" value="复印机卡纸" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:4px;">
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:500;">大骨 (主要类别)</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <span style="padding:4px 8px; background:#eff6ff; color:#2563eb; border-radius:4px; font-size:12px;">人 (Man)</span>
+                        <span style="padding:4px 8px; background:#eff6ff; color:#2563eb; border-radius:4px; font-size:12px;">机 (Machine)</span>
+                        <span style="padding:4px 8px; background:#eff6ff; color:#2563eb; border-radius:4px; font-size:12px;">料 (Material)</span>
+                        <span style="padding:4px 8px; background:#eff6ff; color:#2563eb; border-radius:4px; font-size:12px;">法 (Method)</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:500;">原因节点列表</label>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>类别</th>
+                                <th>原因</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>人</td>
+                                <td><input type="text" value="操作不当"></td>
+                            </tr>
+                            <tr>
+                                <td>机</td>
+                                <td><input type="text" value="滚轮磨损"></td>
+                            </tr>
+                            <tr>
+                                <td>料</td>
+                                <td><input type="text" value="纸张受潮"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-outline" style="width:100%; margin-top:8px; border-style:dashed;">+ 添加原因</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Canvas Area -->
+        <main class="canvas-area">
+            <div class="chart-placeholder">
+                <div class="chart-header" id="chart-title">鱼骨图预览</div>
+                <div class="chart-body" id="chart-body">
+                    <!-- CSS Mockup of a Fishbone -->
+                    <div class="fishbone-mock">
+                        <div class="fishbone-head"></div>
+                        <div class="fishbone-label">复印机卡纸</div>
+                        
+                        <!-- Mock bones -->
+                        <div style="position:absolute; top:-60px; left:50px; width:2px; height:60px; background:#ccc; transform:rotate(-45deg);"></div>
+                        <div style="position:absolute; top:5px; left:30px; font-size:12px;">人</div>
+
+                        <div style="position:absolute; bottom:-60px; left:150px; width:2px; height:60px; background:#ccc; transform:rotate(45deg);"></div>
+                        <div style="position:absolute; bottom:5px; left:130px; font-size:12px;">机</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="tool-btn" title="放大">+</div>
+                <div class="tool-btn" title="缩小">-</div>
+                <div class="tool-btn" title="适应屏幕">Fit</div>
+                <div class="tool-btn" title="全屏">[]</div>
+            </div>
+        </main>
+
+    </div>
+
+    <script>
+        function switchTab(element, type) {
+            // Update Tab Active State
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+
+            // Update Content (Mock logic)
+            const title = document.getElementById('chart-title');
+            const body = document.getElementById('chart-body');
+            const panel = document.getElementById('panel-content');
+
+            if (type === 'fishbone') {
+                title.textContent = '鱼骨图预览';
+                body.innerHTML = `
+                    <div class="fishbone-mock">
+                        <div class="fishbone-head"></div>
+                        <div class="fishbone-label">示例问题</div>
+                        <div style="position:absolute; top:-60px; left:50px; width:2px; height:60px; background:#ccc; transform:rotate(-45deg);"></div>
+                    </div>`;
+                panel.innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:500;">主骨</label>
+                        <input type="text" value="示例问题" style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:4px;">
+                    </div>
+                    <!-- (Repeated inputs for Fishbone) -->
+                `;
+            } else if (type === 'pareto') {
+                title.textContent = '排列图预览';
+                body.innerHTML = '<div style="display:flex; align-items:flex-end; gap:8px; height:200px;">' +
+                                 '<div style="width:30px; height:80%; background:#3b82f6;"></div>' + 
+                                 '<div style="width:30px; height:50%; background:#3b82f6;"></div>' + 
+                                 '<div style="width:30px; height:20%; background:#3b82f6;"></div>' + 
+                                 '</div>';
+                panel.innerHTML = `
+                     <table class="data-table">
+                        <thead><tr><th>不合格项</th><th>频数</th></tr></thead>
+                        <tbody>
+                            <tr><td>A类缺陷</td><td><input type="number" value="120"></td></tr>
+                            <tr><td>B类缺陷</td><td><input type="number" value="80"></td></tr>
+                            <tr><td>C类缺陷</td><td><input type="number" value="40"></td></tr>
+                        </tbody>
+                    </table>
+                `;
+            } else {
+                title.textContent = type.toUpperCase() + ' 预览';
+                body.innerHTML = '图表渲染区域';
+            }
+        }
+    </script>
+</body>
+</html>
