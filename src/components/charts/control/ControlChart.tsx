@@ -25,7 +25,7 @@ const SPC_CONSTANTS: Record<number, { a2: number; d2: number; d3: number; d4: nu
 };
 
 export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
-    ({ series, styles, className }, ref) => {
+    ({ series, styles, className }: ControlChartProps, ref: React.ForwardedRef<ControlChartRef>) => {
         const containerRef = useRef<HTMLDivElement>(null);
         const canvasRef = useRef<HTMLCanvasElement>(null);
         const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
@@ -54,12 +54,12 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
             if (subgroups.length === 0) return null;
 
             // 2. 计算各组统计量
-            const means = subgroups.map(group => group.reduce((a, b) => a + b, 0) / group.length);
-            const ranges = subgroups.map(group => Math.max(...group) - Math.min(...group));
+            const means = subgroups.map((group: number[]) => group.reduce((a: number, b: number) => a + b, 0) / group.length);
+            const ranges = subgroups.map((group: number[]) => Math.max(...group) - Math.min(...group));
 
             // 3. 计算全局统计量
-            const xDoubleBar = means.reduce((a, b) => a + b, 0) / means.length;
-            const rBar = ranges.reduce((a, b) => a + b, 0) / ranges.length;
+            const xDoubleBar = means.reduce((a: number, b: number) => a + b, 0) / means.length;
+            const rBar = ranges.reduce((a: number, b: number) => a + b, 0) / ranges.length;
 
             // 4. 计算控制限 (以 X-bar-R 为例)
             let ucl = finalStyles.ucl || 0;
@@ -97,7 +97,7 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
             const outliers: number[] = [];
             const dataToTest = (chartType.includes('I-MR')) ? rawData : means;
 
-            dataToTest.forEach((val, i) => {
+            dataToTest.forEach((val: number, i: number) => {
                 // Rule 1: Beyond Limits (Standard)
                 if (val > ucl || val < lcl) {
                     outliers.push(i);
@@ -108,7 +108,7 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
                 if (finalStyles.rules.includes('Western-Electric') || finalStyles.rules.includes('Nelson')) {
                     if (i >= 8) {
                         const slice = dataToTest.slice(i - 8, i + 1);
-                        if (slice.every(v => v > cl) || slice.every(v => v < cl)) {
+                        if (slice.every((v: number) => v > cl) || slice.every((v: number) => v < cl)) {
                             outliers.push(i);
                         }
                     }
@@ -161,21 +161,34 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
 
+            // 1. 确保尺寸为整数，避免亚像素带来的模糊/锯齿
+            const displayWidth = Math.floor(dimensions.width);
+            const displayHeight = Math.floor(dimensions.height);
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = dimensions.width * dpr;
-            canvas.height = dimensions.height * dpr;
+
+            // 2. 设置画布物理尺寸
+            canvas.width = displayWidth * dpr;
+            canvas.height = displayHeight * dpr;
+
+            // 3. 缩放上下文并开启平滑特性
             ctx.scale(dpr, dpr);
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            // 设置线段连接处为圆滑，防止突兀的尖刺（Sawtooth 效应）
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
 
             // 清屏
-            ctx.clearRect(0, 0, dimensions.width, dimensions.height);
+            ctx.clearRect(0, 0, displayWidth, displayHeight);
             if (!transparentArg) {
                 ctx.fillStyle = finalStyles.background;
-                ctx.fillRect(0, 0, dimensions.width, dimensions.height);
+                ctx.fillRect(0, 0, displayWidth, displayHeight);
             }
 
             const padding = { top: 80, right: 100, bottom: 60, left: 80 };
-            const chartW = dimensions.width - padding.left - padding.right;
-            const chartH = dimensions.height - padding.top - padding.bottom;
+            const chartW = displayWidth - padding.left - padding.right;
+            const chartH = displayHeight - padding.top - padding.bottom;
 
             // 算 Y 轴范围 (包含 UCL/LCL 并预留空间)
             const dataMax = Math.max(...stats.points, stats.ucl);
@@ -224,14 +237,14 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
             ctx.strokeStyle = finalStyles.lineColor;
             ctx.lineWidth = 2;
             ctx.beginPath();
-            stats.points.forEach((val, i) => {
+            stats.points.forEach((val: number, i: number) => {
                 if (i === 0) ctx.moveTo(getX(i), getY(val));
                 else ctx.lineTo(getX(i), getY(val));
             });
             ctx.stroke();
 
             // --- 3. 绘制数据点 ---
-            stats.points.forEach((val, i) => {
+            stats.points.forEach((val: number, i: number) => {
                 const isOutlier = stats.outliers.includes(i);
                 ctx.fillStyle = isOutlier ? '#ef4444' : finalStyles.pointColor;
                 ctx.beginPath();
@@ -249,7 +262,7 @@ export const ControlChart = forwardRef<ControlChartRef, ControlChartProps>(
             ctx.fillStyle = finalStyles.titleColor;
             ctx.font = `bold ${finalStyles.titleFontSize}px sans-serif`;
             ctx.textAlign = 'center';
-            ctx.fillText(finalStyles.title, dimensions.width / 2, padding.top / 2);
+            ctx.fillText(finalStyles.title, displayWidth / 2, padding.top / 2);
         }, [stats, dimensions, finalStyles]);
 
         useImperativeHandle(ref, () => ({
